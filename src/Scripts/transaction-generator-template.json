@@ -10,12 +10,11 @@
             "min":1,
             "max":50
         }
-    )}}
+    )}},
     "tollAmount": {{random.number(
         {
             "min":1,
             "max":10
         }
-    )}},
-    "timeStamp": {{date.now}}
+    )}}
 }
