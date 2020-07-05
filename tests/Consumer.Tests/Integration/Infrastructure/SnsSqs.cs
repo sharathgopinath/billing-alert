@@ -24,7 +24,7 @@ namespace Consumer.Tests.Integration.Infrastructure
 
         public SnsSqs()
         {
-            ServiceUrl = TestConfiguration.Config.GetSection("SnsSettings:ServiceUrl").Value;
+            ServiceUrl = TestConfiguration.Config.GetSection("Localstack:ServiceUrl").Value;
 
             _snsClient = new AmazonSimpleNotificationServiceClient(new AmazonSimpleNotificationServiceConfig { ServiceURL = ServiceUrl });
             _sqsClient = new AmazonSQSClient(new AmazonSQSConfig { ServiceURL = ServiceUrl });

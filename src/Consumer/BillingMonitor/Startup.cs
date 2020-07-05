@@ -4,6 +4,8 @@ using Serilog;
 using System;
 using Serilog.Formatting.Json;
 using BillingMonitor.Infrastructure.Messaging;
+using BillingMonitor.Infrastructure.Persistence;
+using Amazon.DynamoDBv2;
 
 namespace BillingMonitor
 {
@@ -50,6 +52,7 @@ namespace BillingMonitor
         {
             var services = new ServiceCollection();
             services.AddSingleton(logger);
+
             services.AddSingleton(s =>
             {
                 return new SnsSettings
@@ -58,7 +61,26 @@ namespace BillingMonitor
                     ServiceUrl = configuration.GetSection("SnsSettings:ServiceUrl").Value
                 };
             });
+            services.AddSingleton(s =>
+            {
+                return new BillingAlertStoreSettings
+                {
+                    TableName = configuration.GetSection("BillingAlertStore:TableName").Value,
+                    ServiceUrl = configuration.GetSection("BillingAlertStore:ServiceUrl").Value
+                };
+            });
+
             services.AddSingleton<IMessagePublisher, MessagePublisher>();
+
+            services.AddSingleton<IAmazonDynamoDB>(s =>
+            {
+                var settings = s.GetService<BillingAlertStoreSettings>();
+                return new AmazonDynamoDBClient(new AmazonDynamoDBConfig
+                {
+                    ServiceURL = settings.ServiceUrl
+                });
+            });
+            services.AddTransient<IBillingAlertStore, BillingAlertStore>();
 
             return services.BuildServiceProvider();
         }

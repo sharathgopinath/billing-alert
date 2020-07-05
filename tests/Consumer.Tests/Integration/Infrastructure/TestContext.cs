@@ -8,10 +8,12 @@ namespace Consumer.Tests.Integration.Infrastructure
     {
         public Lambda Sut { get; }
         public SnsSqs SnsSqs { get; }
+        public DynamoDb DynamoDb { get; }
 
         public TestContext()
         {
             SnsSqs = new SnsSqs();
+            DynamoDb = new DynamoDb();
             
             var config = InitializeAppConfiguration();
             Startup.Initialize(config);
@@ -25,6 +27,8 @@ namespace Consumer.Tests.Integration.Infrastructure
             {
                 { "SnsSettings:ServiceUrl", SnsSqs.ServiceUrl }
                 , { "SnsSettings:TopicArn", SnsSqs.TopicArn }
+                , { "BillingAlertStore:TableName", DynamoDb.BillingAlertStoreTableName }
+                , { "BillingAlertStore:ServiceUrl", DynamoDb.ServiceUrl }
             });
 
             return configurationBuilder.Build();

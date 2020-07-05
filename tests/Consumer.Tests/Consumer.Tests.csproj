@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Amazon.Lambda.Core" Version="1.1.0" />
     <PackageReference Include="Amazon.Lambda.TestUtilities" Version="1.1.0" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.106.28" />
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.3.101.191" />
     <PackageReference Include="AWSSDK.SQS" Version="3.3.103.6" />
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
