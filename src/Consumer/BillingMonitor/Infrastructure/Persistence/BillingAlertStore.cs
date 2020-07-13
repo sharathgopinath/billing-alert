@@ -14,7 +14,7 @@ namespace BillingMonitor.Infrastructure.Persistence
         private readonly ILogger _logger;
         private readonly BillingAlertStoreSettings _settings;
 
-        private static readonly string IdAttribute = nameof(BillingAlert.UserId).ToLower();
+        private static readonly string IdAttribute = nameof(BillingAlert.CustomerId).ToLower();
 
         public BillingAlertStore(IAmazonDynamoDB dynamoDbClient
             , BillingAlertStoreSettings settings
@@ -34,7 +34,7 @@ namespace BillingMonitor.Infrastructure.Persistence
                     Keys = userIds.Select(u => new Dictionary<string, AttributeValue>{ {IdAttribute, new AttributeValue { N = u.ToString() } } }).ToList(),
                     AttributesToGet = new List<string>
                     {
-                        nameof(BillingAlert.UserId).ToLower(),
+                        nameof(BillingAlert.CustomerId).ToLower(),
                         nameof(BillingAlert.AlertAmountThreshold).ToLower(),
                         nameof(BillingAlert.TotalBillAmount).ToLower(),
                         nameof(BillingAlert.BillAmountLastUpdated).ToLower(),
@@ -83,7 +83,7 @@ namespace BillingMonitor.Infrastructure.Persistence
         {
             return new Dictionary<string, AttributeValue>
                 {
-                    { IdAttribute, new AttributeValue{N = billingAlert.UserId.ToString()} },
+                    { IdAttribute, new AttributeValue{N = billingAlert.CustomerId.ToString()} },
                     { nameof(BillingAlert.AlertAmountThreshold).ToLower(), new AttributeValue{N = billingAlert.AlertAmountThreshold.ToString()} },
                     { nameof(BillingAlert.TotalBillAmount).ToLower(), new AttributeValue{N = billingAlert.TotalBillAmount.ToString()} },
                     { nameof(BillingAlert.BillAmountLastUpdated).ToLower(), new AttributeValue{S = billingAlert.BillAmountLastUpdated.ToString()} },
@@ -95,7 +95,7 @@ namespace BillingMonitor.Infrastructure.Persistence
         {
             return new BillingAlert
             {
-                UserId = int.Parse(item[IdAttribute].N),
+                CustomerId = int.Parse(item[IdAttribute].N),
                 AlertAmountThreshold = decimal.Parse(item[nameof(BillingAlert.AlertAmountThreshold).ToLower()].N),
                 TotalBillAmount = decimal.Parse(item[nameof(BillingAlert.TotalBillAmount).ToLower()].N),
                 BillAmountLastUpdated = DateTime.Parse(item[nameof(BillingAlert.BillAmountLastUpdated).ToLower()].S),

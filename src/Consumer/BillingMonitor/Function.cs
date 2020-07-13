@@ -33,16 +33,44 @@ namespace BillingMonitor
         {
             _logger.Information($"Processing {tollAmountMessages.Count()} records.");
 
-            await _billingAlertStore.Put(new List<BillingAlert>
+            var customerIds = tollAmountMessages.Select(t => t.CustomerId);
+
+            try
             {
-                new BillingAlert{UserId=1, AlertAmountThreshold=10, BillAmountLastUpdated = DateTime.UtcNow},
-                new BillingAlert{UserId=2, AlertAmountThreshold=10, BillAmountLastUpdated = DateTime.UtcNow},
-                new BillingAlert{UserId=3, AlertAmountThreshold=10, BillAmountLastUpdated = DateTime.UtcNow},
-            });
+                var billingAlerts = (await _billingAlertStore.Get(customerIds))?.ToList();
 
-            var items = await _billingAlertStore.Get(new List<int> { 1, 2, 3 });
+                if (billingAlerts == null)
+                    billingAlerts = new List<BillingAlert>();
 
-            await _messagePublisher.Publish(tollAmountMessages);
+                var alertsToPublish = new List<AlertMessage>();
+
+                foreach (var billingAlert in billingAlerts)
+                {
+                    var tollAmountMessage = tollAmountMessages.FirstOrDefault(t => t.CustomerId == billingAlert.CustomerId);
+                    billingAlert.TotalBillAmount += tollAmountMessage.TollAmount;
+                    billingAlert.BillAmountLastUpdated = DateTime.UtcNow;
+
+                    if (ShouldAlert(billingAlert))
+                        alertsToPublish.Add(new AlertMessage
+                        {
+                            CustomerId = billingAlert.CustomerId,
+                            TotalBillAmount = billingAlert.TotalBillAmount,
+                            AlertAmountThreshold = billingAlert.AlertAmountThreshold,
+                            Message = DefaultAlertMessage(billingAlert)
+                        });
+                }
+
+                await _messagePublisher.Publish(alertsToPublish);
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex, ex.Message);
+            }
         }
+
+        private string DefaultAlertMessage(BillingAlert billingAlert) => 
+            $"Your toll amount for {DateTime.Now.Month}/{DateTime.Now.Year} is ${billingAlert.TotalBillAmount} and has exceeded the threshold value of {billingAlert.AlertAmountThreshold}";
+
+        private bool ShouldAlert(BillingAlert billingAlert) => !billingAlert.IsAlerted && billingAlert.TotalBillAmount >= billingAlert.AlertAmountThreshold;
     }
 }
