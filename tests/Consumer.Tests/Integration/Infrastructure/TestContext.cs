@@ -1,4 +1,4 @@
-﻿using BillingMonitor;
+﻿using BillingAlert;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 

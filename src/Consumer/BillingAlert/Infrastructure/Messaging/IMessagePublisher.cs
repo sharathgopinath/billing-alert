@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BillingMonitor.Infrastructure.Messaging
+namespace BillingAlert.Infrastructure.Messaging
 {
     public interface IMessagePublisher
     {

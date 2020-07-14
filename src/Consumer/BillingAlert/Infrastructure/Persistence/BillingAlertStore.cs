@@ -4,9 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
+using BillingAlert.Infrastructure.Persistence.Models;
 using Serilog;
 
-namespace BillingMonitor.Infrastructure.Persistence
+namespace BillingAlert.Infrastructure.Persistence
 {
     public class BillingAlertStore : IBillingAlertStore
     {
@@ -14,7 +15,7 @@ namespace BillingMonitor.Infrastructure.Persistence
         private readonly ILogger _logger;
         private readonly BillingAlertStoreSettings _settings;
 
-        private static readonly string IdAttribute = nameof(BillingAlert.CustomerId).ToLower();
+        private static readonly string IdAttribute = nameof(BillingAlertItem.CustomerId).ToLower();
 
         public BillingAlertStore(IAmazonDynamoDB dynamoDbClient
             , BillingAlertStoreSettings settings
@@ -25,7 +26,7 @@ namespace BillingMonitor.Infrastructure.Persistence
             _logger = logger;
         }
 
-        public async Task<IList<BillingAlert>> Get(IEnumerable<int> userIds)
+        public async Task<IList<BillingAlertItem>> Get(IEnumerable<int> userIds)
         {
 
             var response = await _dynamoDbClient.BatchGetItemAsync(new BatchGetItemRequest(new Dictionary<string, KeysAndAttributes>
@@ -34,11 +35,11 @@ namespace BillingMonitor.Infrastructure.Persistence
                     Keys = userIds.Select(u => new Dictionary<string, AttributeValue>{ {IdAttribute, new AttributeValue { N = u.ToString() } } }).ToList(),
                     AttributesToGet = new List<string>
                     {
-                        nameof(BillingAlert.CustomerId).ToLower(),
-                        nameof(BillingAlert.AlertAmountThreshold).ToLower(),
-                        nameof(BillingAlert.TotalBillAmount).ToLower(),
-                        nameof(BillingAlert.BillAmountLastUpdated).ToLower(),
-                        nameof(BillingAlert.IsAlerted).ToLower(),
+                        nameof(BillingAlertItem.CustomerId).ToLower(),
+                        nameof(BillingAlertItem.AlertAmountThreshold).ToLower(),
+                        nameof(BillingAlertItem.TotalBillAmount).ToLower(),
+                        nameof(BillingAlertItem.BillAmountLastUpdated).ToLower(),
+                        nameof(BillingAlertItem.IsAlerted).ToLower(),
                     }
                 } }
             }));
@@ -50,9 +51,9 @@ namespace BillingMonitor.Infrastructure.Persistence
             return items.Select(i => Map(i)).ToList();
         }
 
-        public async Task Put(IEnumerable<BillingAlert> billingAlerts)
+        public async Task Put(IEnumerable<BillingAlertItem> billingAlerts)
         {
-            async Task PutItem(BillingAlert billingAlert)
+            async Task PutItem(BillingAlertItem billingAlert)
             {
                 try
                 {
@@ -79,27 +80,27 @@ namespace BillingMonitor.Infrastructure.Persistence
             await Task.WhenAll(putItemResponses);
         }
 
-        private Dictionary<string, AttributeValue> Map(BillingAlert billingAlert)
+        private Dictionary<string, AttributeValue> Map(BillingAlertItem billingAlert)
         {
             return new Dictionary<string, AttributeValue>
                 {
                     { IdAttribute, new AttributeValue{N = billingAlert.CustomerId.ToString()} },
-                    { nameof(BillingAlert.AlertAmountThreshold).ToLower(), new AttributeValue{N = billingAlert.AlertAmountThreshold.ToString()} },
-                    { nameof(BillingAlert.TotalBillAmount).ToLower(), new AttributeValue{N = billingAlert.TotalBillAmount.ToString()} },
-                    { nameof(BillingAlert.BillAmountLastUpdated).ToLower(), new AttributeValue{S = billingAlert.BillAmountLastUpdated.ToString()} },
-                    { nameof(BillingAlert.IsAlerted).ToLower(), new AttributeValue{BOOL = billingAlert.IsAlerted} }
+                    { nameof(BillingAlertItem.AlertAmountThreshold).ToLower(), new AttributeValue{N = billingAlert.AlertAmountThreshold.ToString()} },
+                    { nameof(BillingAlertItem.TotalBillAmount).ToLower(), new AttributeValue{N = billingAlert.TotalBillAmount.ToString()} },
+                    { nameof(BillingAlertItem.BillAmountLastUpdated).ToLower(), new AttributeValue{S = billingAlert.BillAmountLastUpdated.ToString()} },
+                    { nameof(BillingAlertItem.IsAlerted).ToLower(), new AttributeValue{BOOL = billingAlert.IsAlerted} }
                 };
         }
 
-        private BillingAlert Map(Dictionary<string, AttributeValue> item)
+        private BillingAlertItem Map(Dictionary<string, AttributeValue> item)
         {
-            return new BillingAlert
+            return new BillingAlertItem
             {
                 CustomerId = int.Parse(item[IdAttribute].N),
-                AlertAmountThreshold = decimal.Parse(item[nameof(BillingAlert.AlertAmountThreshold).ToLower()].N),
-                TotalBillAmount = decimal.Parse(item[nameof(BillingAlert.TotalBillAmount).ToLower()].N),
-                BillAmountLastUpdated = DateTime.Parse(item[nameof(BillingAlert.BillAmountLastUpdated).ToLower()].S),
-                IsAlerted = item[nameof(BillingAlert.IsAlerted).ToLower()].BOOL
+                AlertAmountThreshold = decimal.Parse(item[nameof(BillingAlertItem.AlertAmountThreshold).ToLower()].N),
+                TotalBillAmount = decimal.Parse(item[nameof(BillingAlertItem.TotalBillAmount).ToLower()].N),
+                BillAmountLastUpdated = DateTime.Parse(item[nameof(BillingAlertItem.BillAmountLastUpdated).ToLower()].S),
+                IsAlerted = item[nameof(BillingAlertItem.IsAlerted).ToLower()].BOOL
             };
         }
     }

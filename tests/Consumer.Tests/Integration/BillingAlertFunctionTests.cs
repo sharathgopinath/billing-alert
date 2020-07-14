@@ -1,12 +1,12 @@
 using Xunit;
 using FluentAssertions;
-using BillingMonitor.Models;
+using BillingAlert.Models;
 using System.Collections.Generic;
 using Consumer.Tests.Integration.Infrastructure;
 using System.Threading.Tasks;
 using System;
-using BillingMonitor.Infrastructure.Persistence;
 using System.Linq;
+using BillingAlert.Infrastructure.Persistence.Models;
 
 namespace Consumer.Tests.Integration
 {
@@ -19,18 +19,18 @@ namespace Consumer.Tests.Integration
             var billingAlerts = GetSeedData();
         }
 
-        private IEnumerable<BillingAlert> GetSeedData()
+        private IEnumerable<BillingAlertItem> GetSeedData()
         {
-            return new List<BillingAlert>()
+            return new List<BillingAlertItem>()
             {
-                new BillingAlert{ CustomerId=1, AlertAmountThreshold=10.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
-                , new BillingAlert{ CustomerId=2, AlertAmountThreshold=20.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
-                , new BillingAlert{ CustomerId=3, AlertAmountThreshold=30.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
-                , new BillingAlert{ CustomerId=4, AlertAmountThreshold=40.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
-                , new BillingAlert{ CustomerId=5, AlertAmountThreshold=50.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
-                , new BillingAlert{ CustomerId=6, AlertAmountThreshold=10.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
-                , new BillingAlert{ CustomerId=7, AlertAmountThreshold=20.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
-                , new BillingAlert{ CustomerId=8, AlertAmountThreshold=30.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
+                new BillingAlertItem{ CustomerId=1, AlertAmountThreshold=10.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
+                , new BillingAlertItem{ CustomerId=2, AlertAmountThreshold=20.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
+                , new BillingAlertItem{ CustomerId=3, AlertAmountThreshold=30.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
+                , new BillingAlertItem{ CustomerId=4, AlertAmountThreshold=40.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
+                , new BillingAlertItem{ CustomerId=5, AlertAmountThreshold=50.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
+                , new BillingAlertItem{ CustomerId=6, AlertAmountThreshold=10.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
+                , new BillingAlertItem{ CustomerId=7, AlertAmountThreshold=20.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
+                , new BillingAlertItem{ CustomerId=8, AlertAmountThreshold=30.0m, BillAmountLastUpdated = DateTime.UtcNow, IsAlerted = false, TotalBillAmount = 0.0m }
             };
         }
 

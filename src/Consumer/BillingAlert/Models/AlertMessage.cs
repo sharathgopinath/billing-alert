@@ -1,4 +1,4 @@
-﻿namespace BillingMonitor.Models
+﻿namespace BillingAlert.Models
 {
     public class AlertMessage
     {

@@ -1,4 +1,4 @@
-﻿namespace BillingMonitor.Infrastructure.Messaging
+﻿namespace BillingAlert.Infrastructure.Messaging
 {
     public class SnsSettings
     {

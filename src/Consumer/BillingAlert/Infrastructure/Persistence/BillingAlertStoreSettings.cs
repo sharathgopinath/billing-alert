@@ -1,4 +1,4 @@
-﻿namespace BillingMonitor.Infrastructure.Persistence
+﻿namespace BillingAlert.Infrastructure.Persistence
 {
     public class BillingAlertStoreSettings
     {

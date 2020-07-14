@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Consumer\BillingMonitor\BillingMonitor.csproj" />
+    <ProjectReference Include="..\..\src\Consumer\BillingAlert\BillingAlert.csproj" />
   </ItemGroup>
 
   <ItemGroup>

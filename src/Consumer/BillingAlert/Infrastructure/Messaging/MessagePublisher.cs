@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BillingMonitor.Infrastructure.Messaging
+namespace BillingAlert.Infrastructure.Messaging
 {
     public class MessagePublisher : IMessagePublisher
     {

@@ -1,6 +1,6 @@
 ﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
-using BillingMonitor.Infrastructure.Persistence;
+using BillingAlert.Infrastructure.Persistence.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ namespace Consumer.Tests.Integration.Infrastructure
     public class DynamoDb : IAsyncDisposable
     {
         private readonly AmazonDynamoDBClient _dynamoDbClient;
-        private static readonly string IdAttribute = nameof(BillingAlert.CustomerId).ToLower();
+        private static readonly string IdAttribute = nameof(BillingAlertItem.CustomerId).ToLower();
 
         public string BillingAlertStoreTableName { get; }
         public string ServiceUrl { get; }
@@ -27,9 +27,9 @@ namespace Consumer.Tests.Integration.Infrastructure
             });
         }
 
-        public async Task SeedData(IEnumerable<BillingAlert> billingAlerts)
+        public async Task SeedData(IEnumerable<BillingAlertItem> billingAlerts)
         {
-            async Task PutItem(BillingAlert billingAlert)
+            async Task PutItem(BillingAlertItem billingAlert)
             {
                 var item = Map(billingAlert);
                 var response = await _dynamoDbClient.PutItemAsync(new PutItemRequest
@@ -48,7 +48,7 @@ namespace Consumer.Tests.Integration.Infrastructure
             await Task.WhenAll(putItemResponses);
         }
 
-        public async Task<IList<BillingAlert>> Get(IEnumerable<int> userIds)
+        public async Task<IList<BillingAlertItem>> Get(IEnumerable<int> userIds)
         {
             var response = await _dynamoDbClient.BatchGetItemAsync(new BatchGetItemRequest(new Dictionary<string, KeysAndAttributes>
             {
@@ -56,11 +56,11 @@ namespace Consumer.Tests.Integration.Infrastructure
                     Keys = userIds.Select(u => new Dictionary<string, AttributeValue>{ {IdAttribute, new AttributeValue { N = u.ToString() } } }).ToList(),
                     AttributesToGet = new List<string>
                     {
-                        nameof(BillingAlert.CustomerId).ToLower(),
-                        nameof(BillingAlert.AlertAmountThreshold).ToLower(),
-                        nameof(BillingAlert.TotalBillAmount).ToLower(),
-                        nameof(BillingAlert.BillAmountLastUpdated).ToLower(),
-                        nameof(BillingAlert.IsAlerted).ToLower(),
+                        nameof(BillingAlertItem.CustomerId).ToLower(),
+                        nameof(BillingAlertItem.AlertAmountThreshold).ToLower(),
+                        nameof(BillingAlertItem.TotalBillAmount).ToLower(),
+                        nameof(BillingAlertItem.BillAmountLastUpdated).ToLower(),
+                        nameof(BillingAlertItem.IsAlerted).ToLower(),
                     }
                 } }
             }));
@@ -91,36 +91,36 @@ namespace Consumer.Tests.Integration.Infrastructure
                 TableName = BillingAlertStoreTableName,
                 AttributeDefinitions = new List<AttributeDefinition>
                 {
-                    new AttributeDefinition(nameof(BillingAlert.CustomerId).ToLower(), ScalarAttributeType.N)
+                    new AttributeDefinition(nameof(BillingAlertItem.CustomerId).ToLower(), ScalarAttributeType.N)
                 },
                 KeySchema = new List<KeySchemaElement>
                 {
-                    new KeySchemaElement(nameof(BillingAlert.CustomerId).ToLower(), KeyType.HASH)
+                    new KeySchemaElement(nameof(BillingAlertItem.CustomerId).ToLower(), KeyType.HASH)
                 }
             });
         }
 
-        private Dictionary<string, AttributeValue> Map(BillingAlert billingAlert)
+        private Dictionary<string, AttributeValue> Map(BillingAlertItem billingAlert)
         {
             return new Dictionary<string, AttributeValue>
                 {
                     { IdAttribute, new AttributeValue{N = billingAlert.CustomerId.ToString()} },
-                    { nameof(BillingAlert.AlertAmountThreshold).ToLower(), new AttributeValue{N = billingAlert.AlertAmountThreshold.ToString()} },
-                    { nameof(BillingAlert.TotalBillAmount).ToLower(), new AttributeValue{N = billingAlert.TotalBillAmount.ToString()} },
-                    { nameof(BillingAlert.BillAmountLastUpdated).ToLower(), new AttributeValue{S = billingAlert.BillAmountLastUpdated.ToString()} },
-                    { nameof(BillingAlert.IsAlerted).ToLower(), new AttributeValue{BOOL = billingAlert.IsAlerted} }
+                    { nameof(BillingAlertItem.AlertAmountThreshold).ToLower(), new AttributeValue{N = billingAlert.AlertAmountThreshold.ToString()} },
+                    { nameof(BillingAlertItem.TotalBillAmount).ToLower(), new AttributeValue{N = billingAlert.TotalBillAmount.ToString()} },
+                    { nameof(BillingAlertItem.BillAmountLastUpdated).ToLower(), new AttributeValue{S = billingAlert.BillAmountLastUpdated.ToString()} },
+                    { nameof(BillingAlertItem.IsAlerted).ToLower(), new AttributeValue{BOOL = billingAlert.IsAlerted} }
                 };
         }
 
-        private BillingAlert Map(Dictionary<string, AttributeValue> item)
+        private BillingAlertItem Map(Dictionary<string, AttributeValue> item)
         {
-            return new BillingAlert
+            return new BillingAlertItem
             {
                 CustomerId = int.Parse(item[IdAttribute].N),
-                AlertAmountThreshold = decimal.Parse(item[nameof(BillingAlert.AlertAmountThreshold).ToLower()].N),
-                TotalBillAmount = decimal.Parse(item[nameof(BillingAlert.TotalBillAmount).ToLower()].N),
-                BillAmountLastUpdated = DateTime.Parse(item[nameof(BillingAlert.BillAmountLastUpdated).ToLower()].S),
-                IsAlerted = item[nameof(BillingAlert.IsAlerted).ToLower()].BOOL
+                AlertAmountThreshold = decimal.Parse(item[nameof(BillingAlertItem.AlertAmountThreshold).ToLower()].N),
+                TotalBillAmount = decimal.Parse(item[nameof(BillingAlertItem.TotalBillAmount).ToLower()].N),
+                BillAmountLastUpdated = DateTime.Parse(item[nameof(BillingAlertItem.BillAmountLastUpdated).ToLower()].S),
+                IsAlerted = item[nameof(BillingAlertItem.IsAlerted).ToLower()].BOOL
             };
         }
 

@@ -12,5 +12,5 @@
   "function-runtime": "dotnetcore3.1",
   "function-memory-size": 256,
   "function-timeout": 30,
-  "function-handler": "BillingMonitor::BillingMonitor.Function::Execute"
+  "function-handler": "BillingAlert::BillingAlert.Function::Execute"
 }

@@ -1,7 +1,8 @@
 using Amazon.Lambda.Core;
-using BillingMonitor.Infrastructure.Messaging;
-using BillingMonitor.Infrastructure.Persistence;
-using BillingMonitor.Models;
+using BillingAlert.Infrastructure.Messaging;
+using BillingAlert.Infrastructure.Persistence;
+using BillingAlert.Infrastructure.Persistence.Models;
+using BillingAlert.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
-namespace BillingMonitor
+namespace BillingAlert
 {
     public class Function
     {
@@ -40,7 +41,7 @@ namespace BillingMonitor
                 var billingAlerts = (await _billingAlertStore.Get(customerIds))?.ToList();
 
                 if (billingAlerts == null)
-                    billingAlerts = new List<BillingAlert>();
+                    billingAlerts = new List<BillingAlertItem>();
 
                 var alertsToPublish = new List<AlertMessage>();
 
@@ -71,9 +72,9 @@ namespace BillingMonitor
             }
         }
 
-        private string DefaultAlertMessage(BillingAlert billingAlert) => 
+        private string DefaultAlertMessage(BillingAlertItem billingAlert) => 
             $"Your toll amount for {DateTime.Now.Month}/{DateTime.Now.Year} is ${billingAlert.TotalBillAmount} and has exceeded the threshold value of {billingAlert.AlertAmountThreshold}";
 
-        private bool ShouldAlert(BillingAlert billingAlert) => !billingAlert.IsAlerted && billingAlert.TotalBillAmount >= billingAlert.AlertAmountThreshold;
+        private bool ShouldAlert(BillingAlertItem billingAlert) => !billingAlert.IsAlerted && billingAlert.TotalBillAmount >= billingAlert.AlertAmountThreshold;
     }
 }

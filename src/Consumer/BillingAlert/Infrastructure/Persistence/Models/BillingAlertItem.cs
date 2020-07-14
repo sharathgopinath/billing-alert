@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace BillingMonitor.Infrastructure.Persistence
+namespace BillingAlert.Infrastructure.Persistence.Models
 {
-    public class BillingAlert
+    public class BillingAlertItem
     {
         public int CustomerId { get; set; }
         public decimal AlertAmountThreshold { get; set; }

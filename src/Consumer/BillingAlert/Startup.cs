@@ -3,11 +3,11 @@ using Microsoft.Extensions.Configuration;
 using Serilog;
 using System;
 using Serilog.Formatting.Json;
-using BillingMonitor.Infrastructure.Messaging;
-using BillingMonitor.Infrastructure.Persistence;
+using BillingAlert.Infrastructure.Messaging;
+using BillingAlert.Infrastructure.Persistence;
 using Amazon.DynamoDBv2;
 
-namespace BillingMonitor
+namespace BillingAlert
 {
     public class Startup
     {
@@ -41,7 +41,7 @@ namespace BillingMonitor
         {
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
-                .Enrich.WithProperty("Application", "BillingMonitor")
+                .Enrich.WithProperty("Application", "BillingAlert")
                 .WriteTo.Console(new JsonFormatter())
                 .CreateLogger();
 
