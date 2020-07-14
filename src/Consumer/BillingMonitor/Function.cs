@@ -61,6 +61,9 @@ namespace BillingMonitor
                 }
 
                 await _messagePublisher.Publish(alertsToPublish);
+
+                billingAlerts.ForEach(b => { b.IsAlerted = alertsToPublish.Any(a => a.CustomerId == b.CustomerId); });
+                await _billingAlertStore.Put(billingAlerts);
             }
             catch(Exception ex)
             {

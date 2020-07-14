@@ -6,6 +6,7 @@ using Consumer.Tests.Integration.Infrastructure;
 using System.Threading.Tasks;
 using System;
 using BillingMonitor.Infrastructure.Persistence;
+using System.Linq;
 
 namespace Consumer.Tests.Integration
 {
@@ -52,6 +53,39 @@ namespace Consumer.Tests.Integration
 
             var result = await _testContext.SnsSqs.DequeueMessageAsync<AlertMessage>();
             result.CustomerId.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task WhenAlerted_UpdateBillingAlert()
+        {
+            await _testContext.DynamoDb.RefreshState();
+            await _testContext.DynamoDb.SeedData(GetSeedData());
+
+            var messages = new List<TollAmountMessage>()
+            {
+                new TollAmountMessage
+                {
+                    CustomerId = 1,
+                    TollAmount = 11.2m
+                },
+                new TollAmountMessage
+                {
+                    CustomerId = 2,
+                    TollAmount = 20.0m
+                },
+                new TollAmountMessage
+                {
+                    CustomerId = 3,
+                    TollAmount = 5.2m
+                }
+            };
+
+            await _testContext.Sut.Execute(messages);
+
+            var updatedBillingAlerts = await _testContext.DynamoDb.Get(messages.Select(m => m.CustomerId));
+            updatedBillingAlerts.SingleOrDefault(u => u.CustomerId == messages[0].CustomerId).Should().NotBeNull();
+            updatedBillingAlerts.SingleOrDefault(u => u.CustomerId == messages[1].CustomerId).Should().NotBeNull();
+            updatedBillingAlerts.SingleOrDefault(u => u.CustomerId == messages[2].CustomerId).Should().NotBeNull();
         }
     }
 }

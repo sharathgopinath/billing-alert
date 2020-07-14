@@ -1,5 +1,4 @@
-﻿using Amazon;
-using Amazon.SimpleNotificationService;
+﻿using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;

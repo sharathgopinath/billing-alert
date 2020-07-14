@@ -3,6 +3,7 @@ using Amazon.DynamoDBv2.Model;
 using BillingMonitor.Infrastructure.Persistence;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Consumer.Tests.Integration.Infrastructure
@@ -47,6 +48,27 @@ namespace Consumer.Tests.Integration.Infrastructure
             await Task.WhenAll(putItemResponses);
         }
 
+        public async Task<IList<BillingAlert>> Get(IEnumerable<int> userIds)
+        {
+            var response = await _dynamoDbClient.BatchGetItemAsync(new BatchGetItemRequest(new Dictionary<string, KeysAndAttributes>
+            {
+                {BillingAlertStoreTableName, new KeysAndAttributes{
+                    Keys = userIds.Select(u => new Dictionary<string, AttributeValue>{ {IdAttribute, new AttributeValue { N = u.ToString() } } }).ToList(),
+                    AttributesToGet = new List<string>
+                    {
+                        nameof(BillingAlert.CustomerId).ToLower(),
+                        nameof(BillingAlert.AlertAmountThreshold).ToLower(),
+                        nameof(BillingAlert.TotalBillAmount).ToLower(),
+                        nameof(BillingAlert.BillAmountLastUpdated).ToLower(),
+                        nameof(BillingAlert.IsAlerted).ToLower(),
+                    }
+                } }
+            }));
+
+            var items = response.Responses.FirstOrDefault(r => r.Key == BillingAlertStoreTableName).Value;
+            return items.Select(i => Map(i)).ToList();
+        }
+
         public async Task RefreshState()
         {
             try
@@ -88,6 +110,18 @@ namespace Consumer.Tests.Integration.Infrastructure
                     { nameof(BillingAlert.BillAmountLastUpdated).ToLower(), new AttributeValue{S = billingAlert.BillAmountLastUpdated.ToString()} },
                     { nameof(BillingAlert.IsAlerted).ToLower(), new AttributeValue{BOOL = billingAlert.IsAlerted} }
                 };
+        }
+
+        private BillingAlert Map(Dictionary<string, AttributeValue> item)
+        {
+            return new BillingAlert
+            {
+                CustomerId = int.Parse(item[IdAttribute].N),
+                AlertAmountThreshold = decimal.Parse(item[nameof(BillingAlert.AlertAmountThreshold).ToLower()].N),
+                TotalBillAmount = decimal.Parse(item[nameof(BillingAlert.TotalBillAmount).ToLower()].N),
+                BillAmountLastUpdated = DateTime.Parse(item[nameof(BillingAlert.BillAmountLastUpdated).ToLower()].S),
+                IsAlerted = item[nameof(BillingAlert.IsAlerted).ToLower()].BOOL
+            };
         }
 
         public async ValueTask DisposeAsync()
