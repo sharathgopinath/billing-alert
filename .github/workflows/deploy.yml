@@ -34,7 +34,7 @@ jobs:
     - name: cdk bootstrap
       id: cdk-bootstrap
       run:
-        cdk bootstrap
+        npm run cdk bootstrap
 
     - name: Deploy app
       id: deploy-app
