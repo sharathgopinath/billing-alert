@@ -37,12 +37,24 @@ jobs:
         cd ./build/cdk;
         npm run cdk bootstrap
 
-    - name: Deploy app
-      id: deploy-app
+    - name: Deploy persistence stack
+      id: deploy-persistence-stack
 
       run: 
         cd ./build/cdk;
-        npm run cdk deploy -- 
+        npm run cdk deploy "persistence-stack" -- 
+          --strict
+          --verbose
+          --require-approval never
+          --context Account=$AWS_ACCOUNT
+          --context AppName=billing-alert
+
+    - name: Deploy app stack
+      id: deploy-app-stack
+
+      run: 
+        cd ./build/cdk;
+        npm run cdk deploy "app-stack" -- 
           --strict
           --verbose
           --require-approval never
