@@ -5,8 +5,8 @@ on:
 name: Deploy to AWS
 
 jobs:
-  deploy:
-    name: Deploy
+  build:
+    name: Build
     runs-on: ubuntu-latest
     env:
       AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
@@ -34,8 +34,13 @@ jobs:
     - name: cdk bootstrap
       id: cdk-bootstrap
       run:
+        cd ./build/cdk;
         npm run cdk bootstrap
+   
+  deploy:
+    name: Deploy
 
+    steps:
     - name: Deploy app
       id: deploy-app
 
