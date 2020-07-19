@@ -1,4 +1,5 @@
-﻿using Amazon.SimpleNotificationService;
+﻿using Amazon;
+using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -19,7 +20,8 @@ namespace BillingAlert.Infrastructure.Messaging
         {
             _client = new AmazonSimpleNotificationServiceClient(new AmazonSimpleNotificationServiceConfig
             {
-                ServiceURL = settings.ServiceUrl
+                ServiceURL = settings.ServiceUrl,
+                AuthenticationRegion = RegionEndpoint.APSoutheast2.SystemName
             });
             _logger = logger;
             _settings = settings;

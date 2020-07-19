@@ -9,7 +9,7 @@ export class DynamodbConstruct extends cdk.Construct{
 
         var tableName = 'billing-alert'
         this.table = new dynamodb.Table(this, tableName, {
-            partitionKey: {name: 'CustomerId', type: dynamodb.AttributeType.NUMBER},
+            partitionKey: {name: 'customerid', type: dynamodb.AttributeType.NUMBER},
             billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
             tableName: tableName
         });
