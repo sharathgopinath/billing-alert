@@ -9,7 +9,7 @@ const app = new cdk.App();
 const appStackName = `${context.getAppName(app)}-stack`;
 const persistenceStackName = `${context.getAppName(app)}-persistence-stack`;
 
-var persistenceStack = new PersistenceStack(app, "BillingAlertPersistenceStack", {
+var persistenceStack = new PersistenceStack(app, "persistence-stack", {
     stackName: persistenceStackName,
     description: 'Billing Alert persistence stack',
     tags:{
@@ -18,7 +18,7 @@ var persistenceStack = new PersistenceStack(app, "BillingAlertPersistenceStack",
     }
 });
 
-new AppStack(app, 'BillingAlertAppStack', {
+new AppStack(app, 'app-stack', {
         billingAlertStoreTableArn: persistenceStack.dynamoDb.table.tableArn,
         billingAlertStoreTableName:persistenceStack.dynamoDb.table.tableName,
     }, 
