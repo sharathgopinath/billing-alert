@@ -16,6 +16,7 @@ export class LambdaConstruct extends cdk.Construct{
         
         var functionName = 'billing-alert';
         this.fn = new lambda.Function(this, functionName, {
+            functionName: functionName,
             runtime: lambda.Runtime.DOTNET_CORE_3_1,
             logRetention: logs.RetentionDays.FIVE_DAYS,
             handler: 'BillingAlert::BillingAlert.Function::Execute',

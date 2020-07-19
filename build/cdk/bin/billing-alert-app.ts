@@ -8,6 +8,7 @@ const app = new cdk.App();
 const stackName = `${context.getAppName(app)}-stack`;
 new BillingAlertAppStack(app, 'BillingAlertAppStack', {
     stackName: stackName,
+    description: 'Billing Alert Stack',
     tags:{
         'AppName': context.getAppName(app),
         'StackName': stackName
