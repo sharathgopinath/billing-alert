@@ -28,6 +28,8 @@ namespace BillingAlert
             _logger = _serviceProvider.GetRequiredService<ILogger>();
             _messagePublisher = _serviceProvider.GetRequiredService<IMessagePublisher>();
             _billingAlertStore = _serviceProvider.GetRequiredService<IBillingAlertStore>();
+
+            _logger.Information("Initializing Lambda function...");
         }
 
         public async Task Execute(IEnumerable<TollAmountMessage> tollAmountMessages)

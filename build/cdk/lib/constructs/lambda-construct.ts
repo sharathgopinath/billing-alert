@@ -28,6 +28,7 @@ export class LambdaConstruct extends cdk.Construct{
         });
         this.fn.addToRolePolicy(this.createSnsAccessPolicy(props.snsTopicArn));
         this.fn.addToRolePolicy(this.createDynamodbAccessPolicy(props.billingAlertStoreTableArn));
+        this.fn.addToRolePolicy(this.createKinesisAccessPolicy());
     }
 
     private createSnsAccessPolicy(snsArn: string){
@@ -59,6 +60,20 @@ export class LambdaConstruct extends cdk.Construct{
             ],
             resources: [
                 tableArn
+            ]
+        });
+    }
+
+    private createKinesisAccessPolicy(){
+        return new iam.PolicyStatement({
+            actions: [
+                "kinesis:ListStreams",
+                "kinesis:GetShardIterator",
+                "kinesis:GetRecords",
+                "kinesis:DescribeStream"
+            ],
+            resources: [
+                "*"
             ]
         });
     }
