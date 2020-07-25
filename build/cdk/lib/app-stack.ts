@@ -1,10 +1,13 @@
 import * as cdk from '@aws-cdk/core';
+import * as s3 from '@aws-cdk/aws-s3';
 import { SnsConstruct } from './constructs/sns-construct';
 import { LambdaConstruct } from './constructs/lambda-construct';
 
 interface AppProps{
   billingAlertStoreTableArn:string;
   billingAlertStoreTableName: string;
+  s3Bucket: s3.IBucket;
+  lambdaPackageName: string;
 }
 
 export class AppStack extends cdk.Stack {
@@ -17,7 +20,9 @@ export class AppStack extends cdk.Stack {
     new LambdaConstruct(this, "billing-alert-lambda", {
       billingAlertStoreTableArn: appProps.billingAlertStoreTableArn,
       billingAlertStoreTableName: appProps.billingAlertStoreTableName,
-      snsTopicArn: snsTopic.topic.topicArn
+      snsTopicArn: snsTopic.topic.topicArn,
+      lambdaS3Bucket: appProps.s3Bucket,
+      lambdaPackageName: appProps.lambdaPackageName
     });
   }
 }

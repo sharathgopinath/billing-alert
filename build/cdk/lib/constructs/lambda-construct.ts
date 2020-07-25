@@ -2,11 +2,14 @@ import cdk = require('@aws-cdk/core');
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as logs from '@aws-cdk/aws-logs';
 import * as iam from '@aws-cdk/aws-iam';
+import * as s3 from '@aws-cdk/aws-s3';
 
 interface lambdaProps{
     snsTopicArn: string;
     billingAlertStoreTableArn: string;
     billingAlertStoreTableName: string;
+    lambdaS3Bucket: s3.IBucket;
+    lambdaPackageName: string;
 }
 
 export class LambdaConstruct extends cdk.Construct{
@@ -20,7 +23,7 @@ export class LambdaConstruct extends cdk.Construct{
             runtime: lambda.Runtime.DOTNET_CORE_3_1,
             logRetention: logs.RetentionDays.FIVE_DAYS,
             handler: 'BillingAlert::BillingAlert.Function::Execute',
-            code: lambda.Code.fromAsset("../../src/Consumer/BillingAlert"),
+            code: lambda.Code.fromBucket(props.lambdaS3Bucket, props.lambdaPackageName),
             environment: {
                 SnsSettings__TopicArn: props.snsTopicArn,
                 BillingAlertStore__TableName: props.billingAlertStoreTableName

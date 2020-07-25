@@ -7,5 +7,13 @@ export default {
 
     getAppName(construct: IConstruct): string {
         return construct.node.tryGetContext("AppName");
+    },
+
+    getDepAssetsS3Bucket(construct: IConstruct): string {
+        return construct.node.tryGetContext("DepAssetsS3Bucket");
+    },
+
+    getLambdaPackageName(construct: IConstruct): string {
+        return construct.node.tryGetContext("LambdaPackageName");
     }
 };
