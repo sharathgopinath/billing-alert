@@ -86,6 +86,12 @@ jobs:
         cd ./build/cdk;
         npm install;
         npm run build;
+        
+    - name: cdk bootstrap
+      id: cdk-bootstrap
+      run:
+        cd ./build/cdk;
+        npm run cdk bootstrap
 
     - name: Deploy persistence stack
       id: deploy-persistence-stack
