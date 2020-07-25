@@ -57,7 +57,8 @@ namespace BillingAlert
             {
                 return new SnsSettings
                 {
-                    TopicArn = configuration.GetSection("SnsSettings:TopicArn").Value,
+                    TopicArn = Environment.GetEnvironmentVariable("SnsSettings__TopicArn")
+                               ?? configuration.GetSection("SnsSettings:TopicArn").Value,
                     ServiceUrl = configuration.GetSection("SnsSettings:ServiceUrl").Value
                 };
             });
@@ -65,7 +66,8 @@ namespace BillingAlert
             {
                 return new BillingAlertStoreSettings
                 {
-                    TableName = configuration.GetSection("BillingAlertStore:TableName").Value,
+                    TableName = Environment.GetEnvironmentVariable("BillingAlertStore__TableName")
+                                ?? configuration.GetSection("BillingAlertStore:TableName").Value,
                     ServiceUrl = configuration.GetSection("BillingAlertStore:ServiceUrl").Value
                 };
             });

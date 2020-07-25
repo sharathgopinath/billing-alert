@@ -14,7 +14,7 @@ export class LambdaConstruct extends cdk.Construct{
     constructor(scope: cdk.Construct, id: string, props: lambdaProps){
         super(scope, id);
         
-        var functionName = 'billing-alert';
+        var functionName = 'BillingAlert';
         this.fn = new lambda.Function(this, functionName, {
             functionName: functionName,
             runtime: lambda.Runtime.DOTNET_CORE_3_1,
