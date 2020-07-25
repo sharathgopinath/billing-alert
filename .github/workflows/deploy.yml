@@ -6,7 +6,7 @@ name: Deploy to AWS
 
 jobs:
   build:
-    name: Build BillingAlert Lambda
+    name: Build
     runs-on: ubuntu-latest
     env:
       PACKAGE_TAG: ${{ github.sha }}
@@ -18,7 +18,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-
+      
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -34,7 +34,7 @@ jobs:
         npm install;
         npm run build;
 
-    - name: Deploy assets storage S3 bucket
+    - name: Deploy S3 bucket
       id: deploy-assets-stack
 
       run: 
@@ -47,15 +47,17 @@ jobs:
           --context AppName=billing-alert
           --context DepAssetsS3Bucket=$DEP_ASSETS_BUCKET
 
-    - name: Build and upload package to S3 bucket
-      uses: actions/setup-dotnet@v2
+    - uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '3.1.x'
+      
+    - name: Build and upload package to S3 bucket
+      shell: bash
       run: |
         cd ./src/Consumer/BillingAlert
         dotnet tool install -g Amazon.Lambda.Tools
-        dotnet lambda package -o BillingAlert_$PACKAGE_TAG.zip
-        aws s3 cp ./$FUNCTION_NAME_$PACKAGE_TAG.zip s3://$DEP_ASSETS_BUCKET
+        dotnet lambda package -o ${FUNCTION_NAME}_${PACKAGE_TAG}.zip
+        aws s3 cp ./${FUNCTION_NAME}_${PACKAGE_TAG}.zip s3://$DEP_ASSETS_BUCKET
   
   deploy:
     name: Deploy
@@ -95,6 +97,7 @@ jobs:
 
     - name: Deploy persistence stack
       id: deploy-persistence-stack
+      shell: bash
 
       run: 
         cd ./build/cdk;
@@ -107,6 +110,7 @@ jobs:
 
     - name: Deploy app stack
       id: deploy-app-stack
+      shell: bash
 
       run: 
         cd ./build/cdk;
@@ -117,5 +121,5 @@ jobs:
           --context Account=$AWS_ACCOUNT
           --context AppName=billing-alert
           --context DepAssetsS3Bucket=$DEP_ASSETS_BUCKET
-          --context LambdaPackageName=$FUNCTION_NAME_$PACKAGE_TAG.zip
+          --context LambdaPackageName=${FUNCTION_NAME}_${PACKAGE_TAG}.zip
   
