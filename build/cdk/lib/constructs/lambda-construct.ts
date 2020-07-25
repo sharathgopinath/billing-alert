@@ -3,6 +3,7 @@ import * as lambda from '@aws-cdk/aws-lambda';
 import * as logs from '@aws-cdk/aws-logs';
 import * as iam from '@aws-cdk/aws-iam';
 import * as s3 from '@aws-cdk/aws-s3';
+import { Duration } from '@aws-cdk/core';
 
 interface lambdaProps{
     snsTopicArn: string;
@@ -22,6 +23,7 @@ export class LambdaConstruct extends cdk.Construct{
             functionName: functionName,
             runtime: lambda.Runtime.DOTNET_CORE_3_1,
             logRetention: logs.RetentionDays.FIVE_DAYS,
+            timeout: Duration.seconds(60),
             handler: 'BillingAlert::BillingAlert.Function::Execute',
             code: lambda.Code.fromBucket(props.lambdaS3Bucket, props.lambdaPackageName),
             environment: {
