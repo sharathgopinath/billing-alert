@@ -6,7 +6,7 @@ name: Deploy to AWS
 
 jobs:
   build:
-    name: Build BillingAlert Lambda
+    name: Build
     runs-on: ubuntu-latest
     env:
       PACKAGE_TAG: ${{ github.sha }}
@@ -48,7 +48,7 @@ jobs:
           --context DepAssetsS3Bucket=$DEP_ASSETS_BUCKET
 
     - name: Build and upload package to S3 bucket
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '3.1.x'
       
