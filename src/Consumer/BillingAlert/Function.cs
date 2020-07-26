@@ -93,8 +93,6 @@ namespace BillingAlert
                 using (var reader = new StreamReader(record.Kinesis.Data, Encoding.ASCII))
                 {
                     var jsonString = reader.ReadToEnd();
-                    _logger.Information($"Message: {jsonString}");
-
                     contents.Add(JsonSerializer.Deserialize<T>(jsonString));
                 }
             }
