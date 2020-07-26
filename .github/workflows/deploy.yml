@@ -1,0 +1,123 @@
+on:
+    push:
+      branches: #your branch name
+  
+name: Deploy to AWS
+
+jobs:
+  build:
+    name: Build and Copy assets
+    runs-on: ubuntu-latest
+    env:
+      PACKAGE_TAG: ${{ github.sha }}
+      DEP_ASSETS_BUCKET: 'billing-alert-deployment-assets'
+      FUNCTION_NAME: 'BillingAlert'
+      AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_REGION: 'ap-southeast-2'
+  
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: npm install
+      id: npm-install
+      run: 
+        cd ./build/cdk;
+        npm install;
+        npm run build;
+
+    - name: Deploy S3 bucket
+      id: deploy-assets-stack
+
+      run: 
+        cd ./build/cdk;
+        npm run cdk deploy "dep-assets-stack" -- 
+          --strict
+          --verbose
+          --require-approval never
+          --context Account=$AWS_ACCOUNT
+          --context AppName=billing-alert
+          --context DepAssetsS3Bucket=$DEP_ASSETS_BUCKET
+
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+      
+    - name: Build and upload package to S3 bucket
+      shell: bash
+      run: |
+        cd ./src/Consumer/BillingAlert
+        dotnet tool install -g Amazon.Lambda.Tools
+        dotnet lambda package -o ${FUNCTION_NAME}_${PACKAGE_TAG}.zip
+        aws s3 cp ./${FUNCTION_NAME}_${PACKAGE_TAG}.zip s3://$DEP_ASSETS_BUCKET
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      PACKAGE_TAG: ${{ github.sha }}
+      DEP_ASSETS_BUCKET: 'billing-alert-deployment-assets'
+      FUNCTION_NAME: 'BillingAlert'
+      AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_REGION: 'ap-southeast-2'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: npm install
+      id: npm-install
+      run: 
+        cd ./build/cdk;
+        npm install;
+        npm run build;
+        
+    - name: cdk bootstrap
+      id: cdk-bootstrap
+      run:
+        cd ./build/cdk;
+        npm run cdk bootstrap
+
+    - name: Deploy persistence stack
+      id: deploy-persistence-stack
+      shell: bash
+
+      run: 
+        cd ./build/cdk;
+        npm run cdk deploy "persistence-stack" -- 
+          --strict
+          --verbose
+          --require-approval never
+          --context Account=$AWS_ACCOUNT
+          --context AppName=billing-alert
+
+    - name: Deploy app stack
+      id: deploy-app-stack
+      shell: bash
+
+      run: 
+        cd ./build/cdk;
+        npm run cdk deploy "consumer-app-stack" -- 
+          --strict
+          --verbose
+          --require-approval never
+          --context Account=$AWS_ACCOUNT
+          --context AppName=billing-alert
+          --context DepAssetsS3Bucket=$DEP_ASSETS_BUCKET
+          --context LambdaPackageName=${FUNCTION_NAME}_${PACKAGE_TAG}.zip
+  
