@@ -10,8 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
@@ -40,8 +40,7 @@ namespace BillingAlert
         {
             _logger.Information($"Processing {kinesisEvent.Records.Count} records.");
 
-            var tollAmountMessages = new List<TollAmountMessage>();
-            var messages = GetRecordContents(kinesisEvent.Records);
+            var tollAmountMessages = GetRecordContents<TollAmountMessage>(kinesisEvent.Records);
             var customerIds = tollAmountMessages.Select(t => t.CustomerId);
 
             try
@@ -85,17 +84,18 @@ namespace BillingAlert
 
         private bool ShouldAlert(BillingAlertItem billingAlert) => !billingAlert.IsAlerted && billingAlert.TotalBillAmount >= billingAlert.AlertAmountThreshold;
 
-        private List<string> GetRecordContents(IList<KinesisEvent.KinesisEventRecord> records)
+        private List<T> GetRecordContents<T>(IList<KinesisEvent.KinesisEventRecord> records)
         {
-            _logger.Information(records.First().Kinesis.Data.ToString());
-            var contents = new List<string>();
+            var contents = new List<T>();
+            
             foreach (var record in records)
             {
                 using (var reader = new StreamReader(record.Kinesis.Data, Encoding.ASCII))
                 {
-                    var msg = reader.ReadToEnd();
-                    _logger.Information($"Message: {msg}");
-                    contents.Add(msg);
+                    var jsonString = reader.ReadToEnd();
+                    _logger.Information($"Message: {jsonString}");
+
+                    contents.Add(JsonSerializer.Deserialize<T>(jsonString));
                 }
             }
 

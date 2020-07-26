@@ -11,6 +11,8 @@ using Amazon.Lambda.KinesisEvents;
 using static Amazon.Lambda.KinesisEvents.KinesisEvent;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Json;
+using System.Text;
 
 namespace Consumer.Tests.Integration
 {
@@ -92,26 +94,19 @@ namespace Consumer.Tests.Integration
             updatedBillingAlerts.SingleOrDefault(u => u.CustomerId == messages[2].CustomerId).Should().NotBeNull();
         }
 
-        private static byte[] Serialize<T>(T obj)
-        {
-            using (MemoryStream memStream = new MemoryStream())
-            {
-                BinaryFormatter binSerializer = new BinaryFormatter();
-                binSerializer.Serialize(memStream, obj);
-                return memStream.ToArray();
-            }
-        }
-
         private KinesisEvent GetKinesisEvent(List<TollAmountMessage> tollAmountMessages)
         {
             KinesisEvent kinesisEvent = null;
             foreach (var message in tollAmountMessages)
             {
+                var jsonStringMessage = JsonSerializer.Serialize(message);
                 kinesisEvent = new KinesisEvent
                 {
                     Records = new List<KinesisEventRecord>
                     {
-                        new KinesisEventRecord{Kinesis = new KinesisEvent.Record{Data = new MemoryStream(Serialize(message))}}
+                        new KinesisEventRecord{Kinesis = new KinesisEvent.Record{
+                            Data = new MemoryStream(Encoding.ASCII.GetBytes(jsonStringMessage))}
+                        }
                     }
                 };
             }
