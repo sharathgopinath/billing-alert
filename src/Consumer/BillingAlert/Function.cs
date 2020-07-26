@@ -8,8 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using System.Threading.Tasks;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
@@ -38,7 +40,8 @@ namespace BillingAlert
         {
             _logger.Information($"Processing {kinesisEvent.Records.Count} records.");
 
-            var tollAmountMessages = GetRecordContents<TollAmountMessage>(kinesisEvent.Records);
+            var tollAmountMessages = new List<TollAmountMessage>();
+            var messages = GetRecordContents(kinesisEvent.Records);
             var customerIds = tollAmountMessages.Select(t => t.CustomerId);
 
             try
@@ -82,15 +85,18 @@ namespace BillingAlert
 
         private bool ShouldAlert(BillingAlertItem billingAlert) => !billingAlert.IsAlerted && billingAlert.TotalBillAmount >= billingAlert.AlertAmountThreshold;
 
-        private IEnumerable<T> GetRecordContents<T>(IList<KinesisEvent.KinesisEventRecord> records)
+        private List<string> GetRecordContents(IList<KinesisEvent.KinesisEventRecord> records)
         {
             _logger.Information(records.First().Kinesis.Data.ToString());
-            var contents = new List<T>();
+            var contents = new List<string>();
             foreach (var record in records)
             {
-                var binarySerializer = new BinaryFormatter();
-                var content = (T)binarySerializer.Deserialize(record.Kinesis.Data);
-                contents.Add(content);
+                using (var reader = new StreamReader(record.Kinesis.Data, Encoding.ASCII))
+                {
+                    var msg = reader.ReadToEnd();
+                    _logger.Information($"Message: {msg}");
+                    contents.Add(msg);
+                }
             }
 
             return contents;
