@@ -1,6 +1,6 @@
 on:
     push:
-      branches: consumer #change this to your branch name
+      branches: #your branch name
   
 name: Deploy to AWS
 
