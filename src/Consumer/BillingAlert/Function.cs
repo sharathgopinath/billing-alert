@@ -1,4 +1,5 @@
 using Amazon.Lambda.Core;
+using Amazon.Lambda.KinesisEvents;
 using BillingAlert.Infrastructure.Messaging;
 using BillingAlert.Infrastructure.Persistence;
 using BillingAlert.Infrastructure.Persistence.Models;
@@ -8,6 +9,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
@@ -32,10 +34,11 @@ namespace BillingAlert
             _logger.Information("Initializing Lambda function...");
         }
 
-        public async Task Execute(IEnumerable<TollAmountMessage> tollAmountMessages)
+        public async Task Execute(KinesisEvent kinesisEvent)
         {
-            _logger.Information($"Processing {tollAmountMessages.Count()} records.");
+            _logger.Information($"Processing {kinesisEvent.Records.Count} records.");
 
+            var tollAmountMessages = GetRecordContents<TollAmountMessage>(kinesisEvent.Records);
             var customerIds = tollAmountMessages.Select(t => t.CustomerId);
 
             try
@@ -72,6 +75,19 @@ namespace BillingAlert
             {
                 _logger.Error(ex, ex.Message);
             }
+        }
+
+        private IEnumerable<T> GetRecordContents<T>(IList<KinesisEvent.KinesisEventRecord> records)
+        {
+            var contents = new List<T>();
+            foreach(var record in records)
+            {
+                var binarySerializer = new BinaryFormatter();
+                var content = (T)binarySerializer.Deserialize(record.Kinesis.Data);
+                contents.Add(content);
+            }
+
+            return contents;
         }
 
         private string DefaultAlertMessage(BillingAlertItem billingAlert) => 
