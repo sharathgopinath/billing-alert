@@ -32,7 +32,7 @@ namespace BillingAlert.Infrastructure.Persistence
             var response = await _dynamoDbClient.BatchGetItemAsync(new BatchGetItemRequest(new Dictionary<string, KeysAndAttributes>
             {
                 {_settings.TableName, new KeysAndAttributes{
-                    Keys = userIds.Select(u => new Dictionary<string, AttributeValue>{ {IdAttribute, new AttributeValue { N = u.ToString() } } }).ToList(),
+                    Keys = userIds.Distinct().Select(u => new Dictionary<string, AttributeValue>{ {IdAttribute, new AttributeValue { N = u.ToString() } } }).ToList(),
                     AttributesToGet = new List<string>
                     {
                         nameof(BillingAlertItem.CustomerId).ToLower(),
