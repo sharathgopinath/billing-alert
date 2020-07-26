@@ -60,7 +60,7 @@ jobs:
 
   deploy:
     name: Deploy
-    needs: test
+    needs: build
     runs-on: ubuntu-latest
     env:
       PACKAGE_TAG: ${{ github.sha }}
