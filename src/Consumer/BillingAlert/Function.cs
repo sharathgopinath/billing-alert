@@ -77,10 +77,16 @@ namespace BillingAlert
             }
         }
 
+        private string DefaultAlertMessage(BillingAlertItem billingAlert) => 
+            $"Your toll amount for {DateTime.Now.Month}/{DateTime.Now.Year} is ${billingAlert.TotalBillAmount} and has exceeded the threshold value of {billingAlert.AlertAmountThreshold}";
+
+        private bool ShouldAlert(BillingAlertItem billingAlert) => !billingAlert.IsAlerted && billingAlert.TotalBillAmount >= billingAlert.AlertAmountThreshold;
+
         private IEnumerable<T> GetRecordContents<T>(IList<KinesisEvent.KinesisEventRecord> records)
         {
+            _logger.Information(records.First().Kinesis.Data.ToString());
             var contents = new List<T>();
-            foreach(var record in records)
+            foreach (var record in records)
             {
                 var binarySerializer = new BinaryFormatter();
                 var content = (T)binarySerializer.Deserialize(record.Kinesis.Data);
@@ -89,10 +95,5 @@ namespace BillingAlert
 
             return contents;
         }
-
-        private string DefaultAlertMessage(BillingAlertItem billingAlert) => 
-            $"Your toll amount for {DateTime.Now.Month}/{DateTime.Now.Year} is ${billingAlert.TotalBillAmount} and has exceeded the threshold value of {billingAlert.AlertAmountThreshold}";
-
-        private bool ShouldAlert(BillingAlertItem billingAlert) => !billingAlert.IsAlerted && billingAlert.TotalBillAmount >= billingAlert.AlertAmountThreshold;
     }
 }
