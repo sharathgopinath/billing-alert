@@ -61,6 +61,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    needs: build
 
     steps:
     - name: Checkout
@@ -75,7 +76,7 @@ jobs:
   
   deploy:
     name: Deploy
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     env:
       PACKAGE_TAG: ${{ github.sha }}
