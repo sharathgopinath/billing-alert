@@ -1,5 +1,5 @@
 # billing-threshold-alert
-Requirement - 2 of the Data solutions on aws kinesis [whitepaper](docs/whitepaper-streaming-data-solutions-on-aws-with-amazon-kinesis)
+Requirement - 2 of the Data solutions on aws kinesis [whitepaper](docs/whitepaper-streaming-data-solutions-on-aws-with-amazon-kinesis.pdf)
 
 ## TODO
 - Documentation
