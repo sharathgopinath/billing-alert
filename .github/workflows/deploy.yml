@@ -58,22 +58,6 @@ jobs:
         dotnet lambda package -o ${FUNCTION_NAME}_${PACKAGE_TAG}.zip
         aws s3 cp ./${FUNCTION_NAME}_${PACKAGE_TAG}.zip s3://$DEP_ASSETS_BUCKET
 
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Run tests
-      shell: bash
-      run: |
-        docker-compose up -d
-        cd ./tests/
-        dotnet test ./Consumer.Tests
-  
   deploy:
     name: Deploy
     needs: test
