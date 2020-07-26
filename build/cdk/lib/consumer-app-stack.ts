@@ -10,7 +10,7 @@ interface AppProps{
   lambdaPackageName: string;
 }
 
-export class AppStack extends cdk.Stack {
+export class ConsumerAppStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, appProps: AppProps, props?: cdk.StackProps) {
     super(scope, id, props);
 

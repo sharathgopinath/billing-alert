@@ -112,7 +112,7 @@ jobs:
 
       run: 
         cd ./build/cdk;
-        npm run cdk deploy "app-stack" -- 
+        npm run cdk deploy "consumer-app-stack" -- 
           --strict
           --verbose
           --require-approval never
