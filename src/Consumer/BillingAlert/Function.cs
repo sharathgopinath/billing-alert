@@ -1,4 +1,5 @@
 using Amazon.Lambda.Core;
+using Amazon.Lambda.KinesisEvents;
 using BillingAlert.Infrastructure.Messaging;
 using BillingAlert.Infrastructure.Persistence;
 using BillingAlert.Infrastructure.Persistence.Models;
@@ -7,7 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
@@ -32,10 +36,11 @@ namespace BillingAlert
             _logger.Information("Initializing Lambda function...");
         }
 
-        public async Task Execute(IEnumerable<TollAmountMessage> tollAmountMessages)
+        public async Task Execute(KinesisEvent kinesisEvent)
         {
-            _logger.Information($"Processing {tollAmountMessages.Count()} records.");
+            _logger.Information($"Processing {kinesisEvent.Records.Count} records.");
 
+            var tollAmountMessages = GetRecordContents<TollAmountMessage>(kinesisEvent.Records);
             var customerIds = tollAmountMessages.Select(t => t.CustomerId);
 
             try
@@ -78,5 +83,21 @@ namespace BillingAlert
             $"Your toll amount for {DateTime.Now.Month}/{DateTime.Now.Year} is ${billingAlert.TotalBillAmount} and has exceeded the threshold value of {billingAlert.AlertAmountThreshold}";
 
         private bool ShouldAlert(BillingAlertItem billingAlert) => !billingAlert.IsAlerted && billingAlert.TotalBillAmount >= billingAlert.AlertAmountThreshold;
+
+        private List<T> GetRecordContents<T>(IList<KinesisEvent.KinesisEventRecord> records)
+        {
+            var contents = new List<T>();
+            
+            foreach (var record in records)
+            {
+                using (var reader = new StreamReader(record.Kinesis.Data, Encoding.ASCII))
+                {
+                    var jsonString = reader.ReadToEnd();
+                    contents.Add(JsonSerializer.Deserialize<T>(jsonString));
+                }
+            }
+
+            return contents;
+        }
     }
 }

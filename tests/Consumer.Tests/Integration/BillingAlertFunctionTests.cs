@@ -7,6 +7,12 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using BillingAlert.Infrastructure.Persistence.Models;
+using Amazon.Lambda.KinesisEvents;
+using static Amazon.Lambda.KinesisEvents.KinesisEvent;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Json;
+using System.Text;
 
 namespace Consumer.Tests.Integration
 {
@@ -49,7 +55,7 @@ namespace Consumer.Tests.Integration
                 }
             };
 
-            await _testContext.Sut.Execute(messages);
+            await _testContext.Sut.Execute(GetKinesisEvent(messages));
 
             var result = await _testContext.SnsSqs.DequeueMessageAsync<AlertMessage>();
             result.CustomerId.Should().Be(1);
@@ -80,12 +86,32 @@ namespace Consumer.Tests.Integration
                 }
             };
 
-            await _testContext.Sut.Execute(messages);
+            await _testContext.Sut.Execute(GetKinesisEvent(messages));
 
             var updatedBillingAlerts = await _testContext.DynamoDb.Get(messages.Select(m => m.CustomerId));
             updatedBillingAlerts.SingleOrDefault(u => u.CustomerId == messages[0].CustomerId).Should().NotBeNull();
             updatedBillingAlerts.SingleOrDefault(u => u.CustomerId == messages[1].CustomerId).Should().NotBeNull();
             updatedBillingAlerts.SingleOrDefault(u => u.CustomerId == messages[2].CustomerId).Should().NotBeNull();
+        }
+
+        private KinesisEvent GetKinesisEvent(List<TollAmountMessage> tollAmountMessages)
+        {
+            KinesisEvent kinesisEvent = null;
+            foreach (var message in tollAmountMessages)
+            {
+                var jsonStringMessage = JsonSerializer.Serialize(message);
+                kinesisEvent = new KinesisEvent
+                {
+                    Records = new List<KinesisEventRecord>
+                    {
+                        new KinesisEventRecord{Kinesis = new KinesisEvent.Record{
+                            Data = new MemoryStream(Encoding.ASCII.GetBytes(jsonStringMessage))}
+                        }
+                    }
+                };
+            }
+
+            return kinesisEvent;
         }
     }
 }
