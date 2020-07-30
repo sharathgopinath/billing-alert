@@ -5,11 +5,15 @@ import context from '../helpers/context';
 import { ConsumerAppStack } from '../lib/consumer-app-stack';
 import { PersistenceStack } from '../lib/persistence-stack';
 import { DepAssetsStack } from '../lib/dep-assets-stack';
+import { ProducerStack } from '../lib/producer-app-stack';
 
 const app = new cdk.App();
+const producerStackName = `${context.getAppName(app)}-producer-stack`;
 const consumerAppStackName = `${context.getAppName(app)}-consumer-stack`;
 const persistenceStackName = `${context.getAppName(app)}-persistence-stack`;
 const depAssetsStackName = `${context.getAppName(app)}-dep-assets-stack`;
+
+var appName = context.getAppName(app);
 
 var depAssetsStack = new DepAssetsStack(app, 'dep-assets-stack', {
         S3BucketName: context.getDepAssetsS3Bucket(app)
@@ -17,8 +21,17 @@ var depAssetsStack = new DepAssetsStack(app, 'dep-assets-stack', {
     stackName: depAssetsStackName,
     description: 'Billing Alert deployment assets stack',
     tags:{
-        'AppName': context.getAppName(app),
+        'AppName': appName,
         'StackName': depAssetsStackName
+    }
+});
+
+var producerStack = new ProducerStack(app, 'producer-stack',{
+    stackName: producerStackName,
+    description: 'Billing Alert producer application stack',
+    tags: {
+        'AppName': appName,
+        'StackName': producerStackName
     }
 });
 
@@ -26,7 +39,7 @@ var persistenceStack = new PersistenceStack(app, 'persistence-stack', {
     stackName: persistenceStackName,
     description: 'Billing Alert persistence stack',
     tags:{
-        'AppName': context.getAppName(app),
+        'AppName': appName,
         'StackName': persistenceStackName
     }
 });
@@ -39,9 +52,9 @@ new ConsumerAppStack(app, 'consumer-app-stack', {
     }, 
     {
         stackName: consumerAppStackName,
-        description: 'Billing Alert application stack',
+        description: 'Billing Alert consumer application stack',
         tags:{
-            'AppName': context.getAppName(app),
+            'AppName': appName,
             'StackName': consumerAppStackName
         }
     });

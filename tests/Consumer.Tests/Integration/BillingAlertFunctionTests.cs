@@ -8,11 +8,10 @@ using System;
 using System.Linq;
 using BillingAlert.Infrastructure.Persistence.Models;
 using Amazon.Lambda.KinesisEvents;
-using static Amazon.Lambda.KinesisEvents.KinesisEvent;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Json;
 using System.Text;
+using static Amazon.Lambda.KinesisEvents.KinesisEvent;
 
 namespace Consumer.Tests.Integration
 {

@@ -87,13 +87,13 @@ namespace BillingAlert
         private List<T> GetRecordContents<T>(IList<KinesisEvent.KinesisEventRecord> records)
         {
             var contents = new List<T>();
-            
+            var jsonSerilaizerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             foreach (var record in records)
             {
                 using (var reader = new StreamReader(record.Kinesis.Data, Encoding.ASCII))
                 {
                     var jsonString = reader.ReadToEnd();
-                    contents.Add(JsonSerializer.Deserialize<T>(jsonString));
+                    contents.Add(JsonSerializer.Deserialize<T>(jsonString, jsonSerilaizerOptions));
                 }
             }
 

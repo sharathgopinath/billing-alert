@@ -68,6 +68,7 @@ jobs:
       FUNCTION_NAME: 'BillingAlert'
       AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
       AWS_REGION: 'ap-southeast-2'
+      APP_NAME: 'billing-alert'
 
     steps:
     - name: Checkout
@@ -93,6 +94,19 @@ jobs:
         cd ./build/cdk;
         npm run cdk bootstrap
 
+    - name: Deploy producer stack
+      id: deploy-producer-stack
+      shell: bash
+
+      run:
+        cd ./build/cdk;
+        npm run cdk deploy "producer-stack" -- 
+          --strict
+          --verbose
+          --require-approval never
+          --context Account=$AWS_ACCOUNT
+          --context AppName=$APP_NAME
+
     - name: Deploy persistence stack
       id: deploy-persistence-stack
       shell: bash
@@ -104,7 +118,7 @@ jobs:
           --verbose
           --require-approval never
           --context Account=$AWS_ACCOUNT
-          --context AppName=billing-alert
+          --context AppName=$APP_NAME
 
     - name: Deploy app stack
       id: deploy-app-stack
@@ -117,7 +131,7 @@ jobs:
           --verbose
           --require-approval never
           --context Account=$AWS_ACCOUNT
-          --context AppName=billing-alert
+          --context AppName=$APP_NAME
           --context DepAssetsS3Bucket=$DEP_ASSETS_BUCKET
           --context LambdaPackageName=${FUNCTION_NAME}_${PACKAGE_TAG}.zip
   
