@@ -100,7 +100,7 @@ jobs:
 
       run:
         cd ./build/cdk;
-        npm run cdk deploy "producer-stack" -- 
+        npm run cdk deploy "producer-app-stack" -- 
           --strict
           --verbose
           --require-approval never

@@ -6,7 +6,7 @@ export class ProducerStack extends cdk.Stack{
     public deliveryStream: CfnDeliveryStream;
     
     constructor(scope: cdk.Construct, id:string, props?: cdk.StackProps){
-        super(scope, id);
+        super(scope, id, props);
 
         var kinesisFirehoseConstruct = new KinesisFirehoseConstruct(this, 'billing-alert-deliverystream')
         this.deliveryStream = kinesisFirehoseConstruct.deliveryStream;

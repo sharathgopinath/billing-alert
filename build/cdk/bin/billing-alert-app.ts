@@ -26,10 +26,10 @@ var depAssetsStack = new DepAssetsStack(app, 'dep-assets-stack', {
     }
 });
 
-var producerStack = new ProducerStack(app, 'producer-stack',{
+new ProducerStack(app, 'producer-app-stack', {
     stackName: producerStackName,
     description: 'Billing Alert producer application stack',
-    tags: {
+    tags:{
         'AppName': appName,
         'StackName': producerStackName
     }
